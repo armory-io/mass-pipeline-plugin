@@ -1,0 +1,59 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+apply plugin: "io.spinnaker.plugin.service-extension"
+apply plugin: "maven-publish"
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+repositories {
+  mavenCentral()
+  maven {
+        url 'https://armory.jfrog.io/armory/gradle-dev-local/'
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+    }
+}
+
+spinnakerPlugin {
+  serviceName = "orca"
+  pluginClass = "io.armory.plugin.stage.wait.random.RandomWaitPlugin"
+}
+
+dependencies {
+  compileOnly "org.pf4j:pf4j:${pf4jVersion}"
+  compileOnly "io.spinnaker.kork:kork-plugins-api:${korkVersion}"
+  compileOnly "io.spinnaker.kork:kork-artifacts:${korkVersion}"
+  compileOnly "io.spinnaker.kork:kork-exceptions:${korkVersion}"
+  compileOnly "io.spinnaker.orca:orca-api:${orcaVersion}"
+  compileOnly "io.spinnaker.orca:orca-front50:${orcaVersion}"
+  compileOnly "io.spinnaker.orca:orca-core:${orcaVersion}"
+
+  testImplementation(platform("io.spinnaker.orca:orca-bom:${orcaVersion}"))
+  testImplementation "io.spinnaker.orca:orca-api"
+  testImplementation "io.spinnaker.orca:orca-api-tck"
+  testImplementation "io.spinnaker.orca:orca-queue"
+  testImplementation "io.spinnaker.kork:kork-plugins-tck"
+
+  testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
+  testImplementation "io.strikt:strikt-core:0.31.0"
+  testImplementation "dev.minutest:minutest:1.13.0"
+  testImplementation "io.mockk:mockk:1.9.3"
+  testImplementation "javax.servlet:javax.servlet-api:4.0.1"
+
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:5.4.0"
+  testRuntime "org.junit.platform:junit-platform-launcher:1.4.0"
+  testRuntime "org.junit.platform:junit-platform-commons:1.5.2"
+}
+
+tasks.withType(Test) {
+  useJUnitPlatform()
+}
